@@ -9,7 +9,7 @@ function BarcodeScanner() {
   useEffect(() => {
     console.log("Scanned code:", result);
     if (result) {
-      fetch("https://scan-production-9cb3.up.railway.app/api/barcodes", {
+      fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: result }),
@@ -23,7 +23,7 @@ function BarcodeScanner() {
 
   // Fetch all scanned barcodes from backend
   const fetchBarcodes = () => {
-    fetch("https://scan-production-9cb3.up.railway.app/api/barcodes")
+    fetch("https://scan-production-500c.up.railway.app/api/barcodes")
       .then((res) => res.json())
       .then((data) => setBarcodes(data))
       .catch((err) => console.error("Error fetching barcodes:", err));
