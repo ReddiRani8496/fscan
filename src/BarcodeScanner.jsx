@@ -5,9 +5,7 @@ function BarcodeScanner() {
   const [result, setResult] = useState("");
   const [barcodes, setBarcodes] = useState([]);
 
-  // Send scanned code to backend when result changes
   useEffect(() => {
-    console.log("Scanned code:", result);
     if (result) {
       fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
         method: "POST",
@@ -21,7 +19,6 @@ function BarcodeScanner() {
     // eslint-disable-next-line
   }, [result]);
 
-  // Fetch all scanned barcodes from backend
   const fetchBarcodes = () => {
     fetch("https://scan-production-500c.up.railway.app/api/barcodes")
       .then((res) => res.json())
@@ -29,7 +26,6 @@ function BarcodeScanner() {
       .catch((err) => console.error("Error fetching barcodes:", err));
   };
 
-  // Initial fetch
   useEffect(() => {
     fetchBarcodes();
   }, []);
@@ -39,9 +35,9 @@ function BarcodeScanner() {
       <h2>Barcode Scanner</h2>
       <div style={{ width: 300, height: 300, margin: "auto" }}>
         <Scanner
-          onResult={(text, data) => setResult(text)}
+          onDecode={setResult}
           onError={(error) => console.error(error)}
-          // width and height props are ignored by this library
+          constraints={{ facingMode: "environment" }}
         />
       </div>
       <p>
