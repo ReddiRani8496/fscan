@@ -6,6 +6,7 @@ function BarcodeScanner() {
   const [barcodes, setBarcodes] = useState([]);
 
   useEffect(() => {
+    console.log("Scanned result:", result);
     if (result) {
       fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
         method: "POST",
@@ -35,9 +36,14 @@ function BarcodeScanner() {
       <h2>Barcode Scanner</h2>
       <div style={{ width: 300, height: 300, margin: "auto" }}>
         <Scanner
-          onDecode={setResult}
+          onScan={(detected) => {
+            console.log("Detected:", detected);
+            if (detected && detected.length > 0) {
+              // Only update if new code is detected
+              setResult(detected[0].rawValue);
+            }
+          }}
           onError={(error) => console.error(error)}
-          constraints={{ facingMode: "environment" }}
         />
       </div>
       <p>
