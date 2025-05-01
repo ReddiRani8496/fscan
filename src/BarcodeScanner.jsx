@@ -37,7 +37,7 @@ function BarcodeScanner() {
   return (
     <div>
       <h2>Barcode Scanner</h2>
-      <div style={{ width: 600, height: 600, margin: "auto" }}>
+      <div style={{ width: 300, height: 300, margin: "auto" }}>
         <Scanner
           onResult={(text, data) => setResult(text)}
           onError={(error) => console.error(error)}
