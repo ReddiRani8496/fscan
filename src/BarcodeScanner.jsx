@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { BarcodeFormat } from "@yudiel/react-qr-scanner";
 
 function BarcodeScanner() {
   const [result, setResult] = useState("");
@@ -40,6 +41,13 @@ function BarcodeScanner() {
             "ean_13",
             "code_128",
             "qr_code",
+            BarcodeFormat.CODE_128,
+            BarcodeFormat.CODE_39,
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.UPC_E,
+            BarcodeFormat.QR_CODE,
             // add more formats as needed: 'upc_a','upc_e','code_39',...
           ]}
           onScan={(detected) => {
