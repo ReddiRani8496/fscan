@@ -70,54 +70,240 @@
 
 // export default BarcodeScanner;
 
+// import React, { useState, useEffect } from "react";
+// import { Scanner } from "@yudiel/react-qr-scanner";
+
+// function BarcodeScanner() {
+//   const [result, setResult] = useState("");
+//   const [barcodes, setBarcodes] = useState([]);
+//   const [showForm, setShowForm] = useState(false);
+//   const [form, setForm] = useState({
+//     code: "",
+//     productName: "",
+//     mrp: "",
+//     discount: "",
+//     weight: "",
+//   });
+//   const [formErrors, setFormErrors] = useState({});
+
+//   // Fetch all barcodes on mount
+//   useEffect(() => {
+//     fetchBarcodes();
+//   }, []);
+
+//   // Handle new scan
+//   useEffect(() => {
+//     if (result) {
+//       const exists = barcodes.some((b) => b.code === result);
+//       if (exists) {
+//         setShowForm(false);
+//         setForm({
+//           code: "",
+//           productName: "",
+//           mrp: "",
+//           discount: "",
+//           weight: "",
+//         });
+//         alert("Barcode already exists. No need to add product.");
+//       } else {
+//         setForm({
+//           code: result,
+//           productName: "",
+//           mrp: "",
+//           discount: "",
+//           weight: "",
+//         });
+//         setShowForm(true);
+//       }
+//     }
+//     // eslint-disable-next-line
+//   }, [result, barcodes]);
+
+//   const fetchBarcodes = () => {
+//     fetch("https://scan-production-500c.up.railway.app/api/barcodes")
+//       .then((res) => res.json())
+//       .then((data) => setBarcodes(data))
+//       .catch((err) => console.error("Error fetching barcodes:", err));
+//   };
+
+//   const handleInputChange = (e) => {
+//     setForm({ ...form, [e.target.name]: e.target.value });
+//   };
+
+//   const validateForm = () => {
+//     const errors = {};
+//     if (!form.productName) errors.productName = true;
+//     if (!form.mrp) errors.mrp = true;
+//     if (!form.discount) errors.discount = true;
+//     if (!form.weight) errors.weight = true;
+//     setFormErrors(errors);
+//     return Object.keys(errors).length === 0;
+//   };
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     if (!validateForm()) return;
+//     fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify(form),
+//     })
+//       .then((res) => res.json())
+//       .then(() => {
+//         fetchBarcodes();
+//         setShowForm(false);
+//         setForm({
+//           code: "",
+//           productName: "",
+//           mrp: "",
+//           discount: "",
+//           weight: "",
+//         });
+//         setResult(""); // Reset scanner result
+//       })
+//       .catch((err) => console.error("Error saving product:", err));
+//   };
+
+//   return (
+//     <div>
+//       <h2>Barcode Scanner</h2>
+//       <div style={{ width: 300, height: 300, margin: "auto" }}>
+//         <Scanner
+//           formats={[
+//             "code_128",
+//             "code_39",
+//             "ean_13",
+//             "ean_8",
+//             "upc_a",
+//             "upc_e",
+//             "qr_code",
+//           ]}
+//           onScan={(detected) => {
+//             if (detected && detected.length > 0) {
+//               setResult(detected[0].rawValue);
+//             }
+//           }}
+//           onError={(error) => console.error(error)}
+//         />
+//       </div>
+//       <p>
+//         <strong>Scanned:</strong> {result}
+//       </p>
+
+//       {/* Product Form */}
+//       {showForm && (
+//         <form
+//           onSubmit={handleSubmit}
+//           style={{
+//             margin: "20px auto",
+//             padding: 20,
+//             border: "1px solid #eee",
+//             maxWidth: 350,
+//             background: "#fafafa",
+//             borderRadius: 8,
+//           }}
+//         >
+//           <div>
+//             <label>
+//               Barcode: <b>{form.code}</b>
+//             </label>
+//           </div>
+//           <div>
+//             <label>
+//               Product Name <span style={{ color: "red" }}>*</span>
+//             </label>
+//             <input
+//               name="productName"
+//               value={form.productName}
+//               onChange={handleInputChange}
+//               className={formErrors.productName ? "red-border" : ""}
+//               style={{ width: "100%", marginBottom: 8 }}
+//             />
+//           </div>
+//           <div>
+//             <label>
+//               MRP <span style={{ color: "red" }}>*</span>
+//             </label>
+//             <input
+//               name="mrp"
+//               type="number"
+//               value={form.mrp}
+//               onChange={handleInputChange}
+//               className={formErrors.mrp ? "red-border" : ""}
+//               style={{ width: "100%", marginBottom: 8 }}
+//             />
+//           </div>
+//           <div>
+//             <label>
+//               Discount <span style={{ color: "red" }}>*</span>
+//             </label>
+//             <input
+//               name="discount"
+//               type="number"
+//               value={form.discount}
+//               onChange={handleInputChange}
+//               className={formErrors.discount ? "red-border" : ""}
+//               style={{ width: "100%", marginBottom: 8 }}
+//             />
+//           </div>
+//           <div>
+//             <label>
+//               Weight <span style={{ color: "red" }}>*</span>
+//             </label>
+//             <input
+//               name="weight"
+//               value={form.weight}
+//               onChange={handleInputChange}
+//               className={formErrors.weight ? "red-border" : ""}
+//               style={{ width: "100%", marginBottom: 8 }}
+//             />
+//           </div>
+//           <button type="submit" style={{ marginTop: 10 }}>
+//             Add Product
+//           </button>
+//         </form>
+//       )}
+
+//       <h3>All Scanned Barcodes</h3>
+//       <ul>
+//         {barcodes.map((b) => (
+//           <li key={b.id || b._id || b.code}>
+//             {b.code}{" "}
+//             {b.productName && (
+//               <span>
+//                 - {b.productName} (MRP: {b.mrp}, Discount: {b.discount}, Weight:{" "}
+//                 {b.weight})
+//               </span>
+//             )}
+//           </li>
+//         ))}
+//       </ul>
+
+//       {/* Red border style */}
+//       <style>
+//         {`
+//           .red-border {
+//             border: 1px solid red !important;
+//           }
+//         `}
+//       </style>
+//     </div>
+//   );
+// }
+
+// export default BarcodeScanner;
 import React, { useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 
 function BarcodeScanner() {
-  const [result, setResult] = useState("");
   const [barcodes, setBarcodes] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    code: "",
-    productName: "",
-    mrp: "",
-    discount: "",
-    weight: "",
-  });
-  const [formErrors, setFormErrors] = useState({});
+  const [scannedProducts, setScannedProducts] = useState([]); // Current bill
+  const [result, setResult] = useState("");
 
-  // Fetch all barcodes on mount
+  // Fetch all products from DB on mount
   useEffect(() => {
     fetchBarcodes();
   }, []);
-
-  // Handle new scan
-  useEffect(() => {
-    if (result) {
-      const exists = barcodes.some((b) => b.code === result);
-      if (exists) {
-        setShowForm(false);
-        setForm({
-          code: "",
-          productName: "",
-          mrp: "",
-          discount: "",
-          weight: "",
-        });
-        alert("Barcode already exists. No need to add product.");
-      } else {
-        setForm({
-          code: result,
-          productName: "",
-          mrp: "",
-          discount: "",
-          weight: "",
-        });
-        setShowForm(true);
-      }
-    }
-    // eslint-disable-next-line
-  }, [result, barcodes]);
 
   const fetchBarcodes = () => {
     fetch("https://scan-production-500c.up.railway.app/api/barcodes")
@@ -126,43 +312,62 @@ function BarcodeScanner() {
       .catch((err) => console.error("Error fetching barcodes:", err));
   };
 
-  const handleInputChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const validateForm = () => {
-    const errors = {};
-    if (!form.productName) errors.productName = true;
-    if (!form.mrp) errors.mrp = true;
-    if (!form.discount) errors.discount = true;
-    if (!form.weight) errors.weight = true;
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        fetchBarcodes();
-        setShowForm(false);
-        setForm({
-          code: "",
-          productName: "",
-          mrp: "",
-          discount: "",
-          weight: "",
+  // Handle scan
+  useEffect(() => {
+    if (result) {
+      const product = barcodes.find((b) => b.code === result);
+      if (product) {
+        setScannedProducts((prev) => {
+          // If already in bill, increment quantity
+          const existing = prev.find((p) => p.code === product.code);
+          if (existing) {
+            return prev.map((p) =>
+              p.code === product.code ? { ...p, quantity: p.quantity + 1 } : p
+            );
+          } else {
+            // Add new product with quantity 1
+            return [...prev, { ...product, quantity: 1 }];
+          }
         });
-        setResult(""); // Reset scanner result
-      })
-      .catch((err) => console.error("Error saving product:", err));
+      } else {
+        alert("Product not found in database. Please add product first.");
+      }
+      setResult(""); // Reset scanner for next scan
+    }
+    // eslint-disable-next-line
+  }, [result, barcodes]);
+
+  // Quantity handlers
+  const increment = (code) => {
+    setScannedProducts((prev) =>
+      prev.map((p) =>
+        p.code === code ? { ...p, quantity: p.quantity + 1 } : p
+      )
+    );
   };
+  const decrement = (code) => {
+    setScannedProducts((prev) =>
+      prev
+        .map((p) =>
+          p.code === code ? { ...p, quantity: Math.max(1, p.quantity - 1) } : p
+        )
+        .filter((p) => p.quantity > 0)
+    );
+  };
+  const removeProduct = (code) => {
+    setScannedProducts((prev) => prev.filter((p) => p.code !== code));
+  };
+  const clearBill = () => {
+    setScannedProducts([]);
+  };
+
+  // Bill calculation
+  const getTotal = () =>
+    scannedProducts.reduce(
+      (sum, p) =>
+        sum + (Number(p.mrp) - Number(p.discount)) * Number(p.quantity),
+      0
+    );
 
   return (
     <div>
@@ -186,107 +391,81 @@ function BarcodeScanner() {
           onError={(error) => console.error(error)}
         />
       </div>
-      <p>
-        <strong>Scanned:</strong> {result}
-      </p>
 
-      {/* Product Form */}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            margin: "20px auto",
-            padding: 20,
-            border: "1px solid #eee",
-            maxWidth: 350,
-            background: "#fafafa",
-            borderRadius: 8,
-          }}
-        >
-          <div>
-            <label>
-              Barcode: <b>{form.code}</b>
-            </label>
+      <h3>Current Bill</h3>
+      {scannedProducts.length === 0 ? (
+        <p>No products scanned yet.</p>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <table
+            border={1}
+            cellPadding={6}
+            style={{ margin: "auto", minWidth: 600 }}
+          >
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>MRP</th>
+                <th>Discount</th>
+                <th>Weight</th>
+                <th>Quantity</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scannedProducts.map((p) => (
+                <tr key={p.code}>
+                  <td>{p.productName}</td>
+                  <td>{p.mrp}</td>
+                  <td>{p.discount}</td>
+                  <td>{p.weight}</td>
+                  <td>
+                    <button onClick={() => decrement(p.code)}>-</button>
+                    <span style={{ margin: "0 8px" }}>{p.quantity}</span>
+                    <button onClick={() => increment(p.code)}>+</button>
+                  </td>
+                  <td>
+                    <button onClick={() => removeProduct(p.code)}>
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={4} style={{ textAlign: "right" }}>
+                  <b>Total</b>
+                </td>
+                <td colSpan={2}>
+                  <b>₹{getTotal().toFixed(2)}</b>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <div style={{ marginTop: 20, textAlign: "center" }}>
+            <button onClick={() => alert("Bill generated!")}>
+              Generate Bill
+            </button>
+            <button
+              onClick={clearBill}
+              style={{ marginLeft: 16, background: "#f33", color: "#fff" }}
+            >
+              Clear Bill (New Customer)
+            </button>
           </div>
-          <div>
-            <label>
-              Product Name <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="productName"
-              value={form.productName}
-              onChange={handleInputChange}
-              className={formErrors.productName ? "red-border" : ""}
-              style={{ width: "100%", marginBottom: 8 }}
-            />
-          </div>
-          <div>
-            <label>
-              MRP <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="mrp"
-              type="number"
-              value={form.mrp}
-              onChange={handleInputChange}
-              className={formErrors.mrp ? "red-border" : ""}
-              style={{ width: "100%", marginBottom: 8 }}
-            />
-          </div>
-          <div>
-            <label>
-              Discount <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="discount"
-              type="number"
-              value={form.discount}
-              onChange={handleInputChange}
-              className={formErrors.discount ? "red-border" : ""}
-              style={{ width: "100%", marginBottom: 8 }}
-            />
-          </div>
-          <div>
-            <label>
-              Weight <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="weight"
-              value={form.weight}
-              onChange={handleInputChange}
-              className={formErrors.weight ? "red-border" : ""}
-              style={{ width: "100%", marginBottom: 8 }}
-            />
-          </div>
-          <button type="submit" style={{ marginTop: 10 }}>
-            Add Product
-          </button>
-        </form>
+        </div>
       )}
 
-      <h3>All Scanned Barcodes</h3>
+      <h3>All Products in Database</h3>
       <ul>
         {barcodes.map((b) => (
-          <li key={b.id || b._id || b.code}>
-            {b.code}{" "}
-            {b.productName && (
-              <span>
-                - {b.productName} (MRP: {b.mrp}, Discount: {b.discount}, Weight:{" "}
-                {b.weight})
-              </span>
-            )}
+          <li key={b.code}>
+            {b.code} - {b.productName} (MRP: {b.mrp}, Discount: {b.discount},
+            Weight: {b.weight})
           </li>
         ))}
       </ul>
-
-      {/* Red border style */}
-      <style>
-        {`
-          .red-border {
-            border: 1px solid red !important;
-          }
-        `}
-      </style>
     </div>
   );
 }
