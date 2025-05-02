@@ -384,7 +384,7 @@ function BarcodeScanner() {
       body: JSON.stringify(form),
     })
       .then((res) => res.json())
-      .then((savedProduct) => {
+      .then(() => {
         fetchBarcodes();
         setShowForm(false);
         setForm({
@@ -398,6 +398,17 @@ function BarcodeScanner() {
         setScannedProducts((prev) => [...prev, { ...form, quantity: 1 }]);
       })
       .catch((err) => console.error("Error saving product:", err));
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setForm({
+      code: "",
+      productName: "",
+      mrp: "",
+      discount: "",
+      weight: "",
+    });
   };
 
   // Quantity handlers
@@ -523,9 +534,24 @@ function BarcodeScanner() {
               style={{ width: "100%", marginBottom: 8 }}
             />
           </div>
-          <button type="submit" style={{ marginTop: 10 }}>
-            Add Product
-          </button>
+          <div style={{ marginTop: 10 }}>
+            <button type="submit">Add Product</button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              style={{
+                marginLeft: 10,
+                background: "#f33",
+                color: "#fff",
+                border: "none",
+                padding: "6px 12px",
+                borderRadius: 4,
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
@@ -594,16 +620,6 @@ function BarcodeScanner() {
           </div>
         </div>
       )}
-
-      <h3>All Products in Database</h3>
-      <ul>
-        {barcodes.map((b) => (
-          <li key={b.code}>
-            {b.code} - {b.productName} (MRP: {b.mrp}, Discount: {b.discount},
-            Weight: {b.weight})
-          </li>
-        ))}
-      </ul>
 
       {/* Red border style */}
       <style>
