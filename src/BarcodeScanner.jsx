@@ -71,40 +71,35 @@
 // export default BarcodeScanner;
 import React, { useState, useEffect, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
-// If you need to support browsers without <dialog>:
+// Optional polyfill for <dialog> in older browsers:
 import dialogPolyfill from "dialog-polyfill";
 import "dialog-polyfill/dist/dialog-polyfill.css";
 
 export default function BarcodeScanner() {
   // scanned raw code
   const [scannedCode, setScannedCode] = useState("");
-  // all existing barcodes from your API
+  // existing barcodes
   const [barcodes, setBarcodes] = useState([]);
-  // modal visibility
+  // dialog visibility
   const [showModal, setShowModal] = useState(false);
 
   // form fields
   const [productName, setProductName] = useState("");
+  const [weight, setWeight] = useState("");
   const [mrp, setMrp] = useState("");
   const [discount, setDiscount] = useState("");
-  const [weight, setWeight] = useState("");
 
-  // ref to our <dialog>
   const dialogRef = useRef(null);
 
-  // fetch existing barcodes on mount
+  // fetch barcodes on mount
   useEffect(() => {
-    fetchBarcodes();
+    fetch("https://scan-production-500c.up.railway.app/api/barcodes")
+      .then((r) => r.json())
+      .then(setBarcodes)
+      .catch(console.error);
   }, []);
 
-  function fetchBarcodes() {
-    fetch("https://scan-production-500c.up.railway.app/api/barcodes")
-      .then((res) => res.json())
-      .then((data) => setBarcodes(data))
-      .catch((err) => console.error("Fetch error:", err));
-  }
-
-  // register dialog-polyfill if needed
+  // polyfill registration
   useEffect(() => {
     if (
       dialogRef.current &&
@@ -114,25 +109,21 @@ export default function BarcodeScanner() {
     }
   }, []);
 
-  // when scannedCode changes, decide whether to pop open the dialog
+  // open dialog on new scan
   useEffect(() => {
     if (!scannedCode) return;
     const exists = barcodes.some((b) => b.code === scannedCode);
     if (exists) {
-      // code already in DB → reset scanner
       setScannedCode("");
     } else {
       setShowModal(true);
     }
   }, [scannedCode, barcodes]);
 
-  // open/close the native dialog
+  // imperatively show/hide dialog
   useEffect(() => {
-    if (showModal) {
-      dialogRef.current?.showModal();
-    } else {
-      dialogRef.current?.close();
-    }
+    if (showModal) dialogRef.current?.showModal();
+    else dialogRef.current?.close();
   }, [showModal]);
 
   function handleScan(detected) {
@@ -145,32 +136,35 @@ export default function BarcodeScanner() {
     setShowModal(false);
     setScannedCode("");
     setProductName("");
+    setWeight("");
     setMrp("");
     setDiscount("");
-    setWeight("");
   }
 
   function handleSubmit(e) {
     e.preventDefault();
-    const payload = {
-      code: scannedCode,
-      productName,
-      mrp: parseFloat(mrp),
-      discount: parseFloat(discount),
-      weight,
-    };
-
     fetch("https://scan-production-500c.up.railway.app/api/barcodes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        code: scannedCode,
+        productName,
+        weight,
+        mrp: parseFloat(mrp),
+        discount: parseFloat(discount),
+      }),
     })
-      .then((res) => res.json())
+      .then((r) => r.json())
       .then(() => {
-        fetchBarcodes();
-        closeModal();
+        // refresh list + close
+        return fetch(
+          "https://scan-production-500c.up.railway.app/api/barcodes"
+        );
       })
-      .catch((err) => console.error("Save error:", err));
+      .then((r) => r.json())
+      .then(setBarcodes)
+      .then(closeModal)
+      .catch(console.error);
   }
 
   return (
@@ -211,7 +205,7 @@ export default function BarcodeScanner() {
         ))}
       </ul>
 
-      {/* --- The Dialog --- */}
+      {/* Modal as native <dialog> */}
       <dialog
         ref={dialogRef}
         className="
@@ -224,26 +218,27 @@ export default function BarcodeScanner() {
           closeModal();
         }}
       >
-        {/* Backdrop */}
+        {/* backdrop */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={closeModal}
         />
 
-        {/* Dialog Panel */}
+        {/* form panel */}
         <form
           onSubmit={handleSubmit}
           className="relative z-50 flex flex-col h-full"
         >
-          {/* Header */}
+          {/* header */}
           <header className="flex items-center justify-between px-6 py-4 border-b">
             <h2 className="text-xl font-semibold">Add Product</h2>
             <button
               type="button"
               onClick={closeModal}
               aria-label="Close"
-              className="p-2 text-gray-500 hover:text-gray-700"
+              className="p-2 text-gray-500 hover:text-gray-700 bg-transparent border-0 focus:outline-none"
             >
+              {/* simple X icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -260,25 +255,28 @@ export default function BarcodeScanner() {
             </button>
           </header>
 
-          {/* Body */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* Barcode (read-only) */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
+              <label className="block mb-1 text-sm font-medium text-gray-700">
                 Barcode
               </label>
               <input
                 type="text"
                 readOnly
                 value={scannedCode}
-                className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+                className="mt-1 block w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg"
               />
             </div>
 
             {/* Product Name */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Product Name <span className="text-red-500">*</span>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Product Name{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
               </label>
               <input
                 type="text"
@@ -286,14 +284,17 @@ export default function BarcodeScanner() {
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 placeholder="Enter product name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg"
               />
             </div>
 
             {/* Weight */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Weight <span className="text-red-500">*</span>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Weight{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
               </label>
               <input
                 type="text"
@@ -301,14 +302,17 @@ export default function BarcodeScanner() {
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="e.g. 500 g"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg"
               />
             </div>
 
             {/* MRP */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                MRP <span className="text-red-500">*</span>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                MRP{" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
               </label>
               <input
                 type="number"
@@ -317,14 +321,17 @@ export default function BarcodeScanner() {
                 value={mrp}
                 onChange={(e) => setMrp(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg"
               />
             </div>
 
             {/* Discount */}
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Discount (%) <span className="text-red-500">*</span>
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                Discount (%){" "}
+                <span className="text-red-500" aria-hidden="true">
+                  *
+                </span>
               </label>
               <input
                 type="number"
@@ -333,23 +340,23 @@ export default function BarcodeScanner() {
                 value={discount}
                 onChange={(e) => setDiscount(e.target.value)}
                 placeholder="0.00"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+                className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg"
               />
             </div>
           </div>
 
-          {/* Footer */}
-          <footer className="flex justify-end space-x-3 px-6 py-4 border-t">
+          {/* footer */}
+          <footer className="flex justify-between px-6 py-4 border-t">
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none"
             >
               Add Product
             </button>
