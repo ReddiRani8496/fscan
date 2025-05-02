@@ -171,7 +171,8 @@ export default function BarcodeScanner() {
     <div className="max-w-xl mx-auto p-6 space-y-6">
       <h2 className="text-2xl font-bold text-center">Barcode Scanner</h2>
 
-      <div className="w-64 h-64 mx-auto border rounded-md overflow-hidden">
+      {/* Responsive scanner container */}
+      <div className="w-full max-w-xs aspect-square mx-auto border rounded-md overflow-hidden mb-4">
         <Scanner
           formats={[
             "code_128",
@@ -187,7 +188,8 @@ export default function BarcodeScanner() {
         />
       </div>
 
-      <p className="text-center">
+      {/* Add top margin for spacing */}
+      <p className="text-center mt-4">
         <span className="font-semibold">Last scanned:</span>{" "}
         {scannedCode || "–"}
       </p>
@@ -229,7 +231,6 @@ export default function BarcodeScanner() {
           onSubmit={handleSubmit}
           className="relative z-50 flex flex-col h-full"
         >
-          {/* header */}
           <header className="flex items-center justify-between px-6 py-4 border-b">
             <h2 className="text-xl font-semibold">Add Product</h2>
             <button
@@ -238,7 +239,6 @@ export default function BarcodeScanner() {
               aria-label="Close"
               className="p-2 text-gray-500 hover:text-gray-700 bg-transparent border-0 focus:outline-none"
             >
-              {/* simple X icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-6 w-6"
@@ -255,9 +255,7 @@ export default function BarcodeScanner() {
             </button>
           </header>
 
-          {/* body */}
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
-            {/* Barcode (read-only) */}
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Barcode
@@ -270,7 +268,6 @@ export default function BarcodeScanner() {
               />
             </div>
 
-            {/* Product Name */}
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Product Name{" "}
@@ -288,7 +285,6 @@ export default function BarcodeScanner() {
               />
             </div>
 
-            {/* Weight */}
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Weight{" "}
@@ -306,7 +302,6 @@ export default function BarcodeScanner() {
               />
             </div>
 
-            {/* MRP */}
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 MRP{" "}
@@ -325,7 +320,6 @@ export default function BarcodeScanner() {
               />
             </div>
 
-            {/* Discount */}
             <div>
               <label className="block mb-1 text-sm font-medium text-gray-700">
                 Discount (%){" "}
@@ -345,7 +339,6 @@ export default function BarcodeScanner() {
             </div>
           </div>
 
-          {/* footer */}
           <footer className="flex justify-between px-6 py-4 border-t">
             <button
               type="button"
