@@ -191,97 +191,133 @@ export default function BarcodeScanner() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-            <h4 className="text-lg font-semibold mb-4">Add New Product</h4>
-            <form className="space-y-4" onSubmit={handleSubmit}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh]">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-white border-b">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Add Product
+              </h2>
+              <button
+                onClick={closeModal}
+                className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                aria-label="Close"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-4 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {/* Barcode */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block mb-2 text-sm font-medium text-gray-700">
                   Barcode
                 </label>
                 <input
                   type="text"
                   readOnly
                   value={scannedCode}
-                  className="mt-1 w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md focus:outline-none"
+                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
               {/* Product Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Product Name
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Product Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter product name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-              </div>
-
-              {/* MRP & Discount */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    MRP
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={mrp}
-                    onChange={(e) => setMrp(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Discount (%)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
               </div>
 
               {/* Weight */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Weight
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Weight <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
+                  required
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
-                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g. 500 g"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-end space-x-2 pt-4 border-t">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Add Product
-                </button>
+              {/* MRP */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  MRP <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={mrp}
+                  onChange={(e) => setMrp(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            </form>
+
+              {/* Discount */}
+              <div>
+                <label className="block mb-2 text-sm font-medium text-gray-700">
+                  Discount (%) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={discount}
+                  onChange={(e) => setDiscount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-white px-6 py-4 border-t flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none"
+              >
+                Add Product
+              </button>
+            </div>
           </div>
         </div>
       )}
