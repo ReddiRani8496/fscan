@@ -1,33 +1,11 @@
 // InvoicePDF.js
 import React from "react";
-import {
-  Page,
-  Text,
-  View,
-  Document,
-  StyleSheet,
-  Font,
-} from "@react-pdf/renderer";
-
-// Optional: Register a font for better look
-Font.register({
-  family: "Roboto",
-  fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu4mxM.woff2",
-    },
-    {
-      src: "https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlfBBc9.ttf",
-      fontWeight: 700,
-    },
-  ],
-});
+import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   page: {
     backgroundColor: "#f6f8fa",
     padding: 32,
-    fontFamily: "Roboto",
     fontSize: 12,
     color: "#222",
   },
