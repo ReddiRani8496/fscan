@@ -294,6 +294,8 @@
 // export default BarcodeScanner;
 import React, { useState, useEffect } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import InvoicePDF from "./InvoicePDF"; // Adjust path if needed
 
 function BarcodeScanner() {
   const [barcodes, setBarcodes] = useState([]);
@@ -308,8 +310,8 @@ function BarcodeScanner() {
     weight: "",
   });
   const [formErrors, setFormErrors] = useState({});
+  const [billDate, setBillDate] = useState(new Date().toLocaleString());
 
-  // Fetch all products from DB on mount
   useEffect(() => {
     fetchBarcodes();
   }, []);
@@ -321,7 +323,6 @@ function BarcodeScanner() {
       .catch((err) => console.error("Error fetching barcodes:", err));
   };
 
-  // Handle scan
   useEffect(() => {
     if (result) {
       const product = barcodes.find((b) => b.code === result);
@@ -345,7 +346,6 @@ function BarcodeScanner() {
           weight: "",
         });
       } else {
-        // Not in DB, show form with code prefilled
         setForm({
           code: result,
           productName: "",
@@ -360,7 +360,6 @@ function BarcodeScanner() {
     // eslint-disable-next-line
   }, [result, barcodes]);
 
-  // Add product form handlers
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -394,7 +393,6 @@ function BarcodeScanner() {
           discount: "",
           weight: "",
         });
-        // Add the newly added product to the bill with quantity 1
         setScannedProducts((prev) => [...prev, { ...form, quantity: 1 }]);
       })
       .catch((err) => console.error("Error saving product:", err));
@@ -411,7 +409,6 @@ function BarcodeScanner() {
     });
   };
 
-  // Quantity handlers
   const increment = (code) => {
     setScannedProducts((prev) =>
       prev.map((p) =>
@@ -433,9 +430,9 @@ function BarcodeScanner() {
   };
   const clearBill = () => {
     setScannedProducts([]);
+    setBillDate(new Date().toLocaleString());
   };
 
-  // Bill calculation
   const getTotal = () =>
     scannedProducts.reduce(
       (sum, p) =>
@@ -608,12 +605,36 @@ function BarcodeScanner() {
             </tfoot>
           </table>
           <div style={{ marginTop: 20, textAlign: "center" }}>
-            <button onClick={() => alert("Bill generated!")}>
-              Generate Bill
-            </button>
+            <PDFDownloadLink
+              document={
+                <InvoicePDF products={scannedProducts} billDate={billDate} />
+              }
+              fileName={`xAbleKart_Invoice_${Date.now()}.pdf`}
+              style={{
+                background: "#1a73e8",
+                color: "#fff",
+                padding: "10px 24px",
+                borderRadius: 6,
+                textDecoration: "none",
+                fontWeight: 700,
+                fontSize: 16,
+                marginRight: 16,
+              }}
+            >
+              {({ loading }) =>
+                loading ? "Generating PDF..." : "Generate Bill (PDF)"
+              }
+            </PDFDownloadLink>
             <button
               onClick={clearBill}
-              style={{ marginLeft: 16, background: "#f33", color: "#fff" }}
+              style={{
+                background: "#f33",
+                color: "#fff",
+                padding: "10px 24px",
+                borderRadius: 6,
+                fontWeight: 700,
+                fontSize: 16,
+              }}
             >
               Clear Bill (New Customer)
             </button>
