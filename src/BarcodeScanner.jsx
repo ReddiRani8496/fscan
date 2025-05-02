@@ -69,9 +69,11 @@
 // }
 
 // export default BarcodeScanner;
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+// If you need to support browsers without <dialog>:
+import dialogPolyfill from "dialog-polyfill";
+import "dialog-polyfill/dist/dialog-polyfill.css";
 
 export default function BarcodeScanner() {
   // scanned raw code
@@ -87,7 +89,10 @@ export default function BarcodeScanner() {
   const [discount, setDiscount] = useState("");
   const [weight, setWeight] = useState("");
 
-  // load existing barcodes on mount
+  // ref to our <dialog>
+  const dialogRef = useRef(null);
+
+  // fetch existing barcodes on mount
   useEffect(() => {
     fetchBarcodes();
   }, []);
@@ -99,23 +104,50 @@ export default function BarcodeScanner() {
       .catch((err) => console.error("Fetch error:", err));
   }
 
-  // whenever we get a new scan, decide to show modal or not
+  // register dialog-polyfill if needed
+  useEffect(() => {
+    if (
+      dialogRef.current &&
+      typeof dialogRef.current.showModal !== "function"
+    ) {
+      dialogPolyfill.registerDialog(dialogRef.current);
+    }
+  }, []);
+
+  // when scannedCode changes, decide whether to pop open the dialog
   useEffect(() => {
     if (!scannedCode) return;
     const exists = barcodes.some((b) => b.code === scannedCode);
     if (exists) {
-      // already in DB → just clear
+      // code already in DB → reset scanner
       setScannedCode("");
     } else {
-      // new code → open modal
       setShowModal(true);
     }
   }, [scannedCode, barcodes]);
+
+  // open/close the native dialog
+  useEffect(() => {
+    if (showModal) {
+      dialogRef.current?.showModal();
+    } else {
+      dialogRef.current?.close();
+    }
+  }, [showModal]);
 
   function handleScan(detected) {
     if (detected && detected.length > 0) {
       setScannedCode(detected[0].rawValue);
     }
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    setScannedCode("");
+    setProductName("");
+    setMrp("");
+    setDiscount("");
+    setWeight("");
   }
 
   function handleSubmit(e) {
@@ -139,16 +171,6 @@ export default function BarcodeScanner() {
         closeModal();
       })
       .catch((err) => console.error("Save error:", err));
-  }
-
-  function closeModal() {
-    // reset form + hide
-    setScannedCode("");
-    setProductName("");
-    setMrp("");
-    setDiscount("");
-    setWeight("");
-    setShowModal(false);
   }
 
   return (
@@ -189,138 +211,151 @@ export default function BarcodeScanner() {
         ))}
       </ul>
 
-      {/* Modal */}
-      {showModal && (
+      {/* --- The Dialog --- */}
+      <dialog
+        ref={dialogRef}
+        className="
+          fixed top-0 left-1/2 transform -translate-x-1/2 mt-20
+          w-full max-w-md rounded-lg bg-white shadow-2xl
+          border-0 p-0 overflow-hidden
+        "
+        onCancel={(e) => {
+          e.preventDefault();
+          closeModal();
+        }}
+      >
+        {/* Backdrop */}
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          role="dialog"
-          aria-modal="true"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={closeModal}
+        />
+
+        {/* Dialog Panel */}
+        <form
+          onSubmit={handleSubmit}
+          className="relative z-50 flex flex-col h-full"
         >
-          <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden max-h-[90vh]">
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 bg-white border-b">
-              <h2 className="text-2xl font-semibold text-gray-900">
-                Add Product
-              </h2>
-              <button
-                onClick={closeModal}
-                className="p-2 text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Close"
+          {/* Header */}
+          <header className="flex items-center justify-between px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold">Add Product</h2>
+            <button
+              type="button"
+              onClick={closeModal}
+              aria-label="Close"
+              className="p-2 text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                stroke="currentColor"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </header>
+
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Barcode (read-only) */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Barcode
+              </label>
+              <input
+                type="text"
+                readOnly
+                value={scannedCode}
+                className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700"
+              />
             </div>
 
-            {/* Body */}
-            <div className="px-6 py-4 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              {/* Barcode */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Barcode
-                </label>
-                <input
-                  type="text"
-                  readOnly
-                  value={scannedCode}
-                  className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Product Name */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Product Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  placeholder="Enter product name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Weight */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Weight <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="e.g. 500 g"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* MRP */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  MRP <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={mrp}
-                  onChange={(e) => setMrp(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              {/* Discount */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-700">
-                  Discount (%) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  required
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+            {/* Product Name */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Product Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+                placeholder="Enter product name"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              />
             </div>
 
-            {/* Footer */}
-            <div className="sticky bottom-0 bg-white px-6 py-4 border-t flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-none"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none"
-              >
-                Add Product
-              </button>
+            {/* Weight */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Weight <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                value={weight}
+                onChange={(e) => setWeight(e.target.value)}
+                placeholder="e.g. 500 g"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            {/* MRP */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                MRP <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                required
+                value={mrp}
+                onChange={(e) => setMrp(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            {/* Discount */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Discount (%) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                required
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                placeholder="0.00"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg"
+              />
             </div>
           </div>
-        </div>
-      )}
+
+          {/* Footer */}
+          <footer className="flex justify-end space-x-3 px-6 py-4 border-t">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Add Product
+            </button>
+          </footer>
+        </form>
+      </dialog>
     </div>
   );
 }
