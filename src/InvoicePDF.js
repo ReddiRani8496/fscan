@@ -1,4 +1,3 @@
-// InvoicePDF.js
 import React from "react";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
 
@@ -93,12 +92,12 @@ const InvoicePDF = ({ products, billDate }) => {
           {products.map((p, idx) => (
             <View style={styles.tableRow} key={p.code}>
               <Text style={styles.tableCell}>{p.productName}</Text>
-              <Text style={styles.tableCell}>{p.mrp}</Text>
-              <Text style={styles.tableCell}>{p.discount}</Text>
+              <Text style={styles.tableCell}>Rs. {p.mrp}</Text>
+              <Text style={styles.tableCell}>Rs. {p.discount}</Text>
               <Text style={styles.tableCell}>{p.weight}</Text>
               <Text style={styles.tableCell}>{p.quantity}</Text>
               <Text style={styles.tableCell}>
-                ₹
+                Rs.{" "}
                 {(
                   (Number(p.mrp) - Number(p.discount)) *
                   Number(p.quantity)
@@ -110,7 +109,7 @@ const InvoicePDF = ({ products, billDate }) => {
             <Text style={styles.tableCell} colSpan={5}>
               Total
             </Text>
-            <Text style={styles.tableCell}>₹{total.toFixed(2)}</Text>
+            <Text style={styles.tableCell}>Rs. {total.toFixed(2)}</Text>
           </View>
         </View>
 

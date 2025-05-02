@@ -636,7 +636,7 @@ function BarcodeScanner() {
                 fontSize: 16,
               }}
             >
-              Clear Bill (New Customer)
+              Clear Bill
             </button>
           </div>
         </div>
