@@ -36,6 +36,12 @@ function BarcodeScanner() {
       <h2>Barcode Scanner</h2>
       <div style={{ width: 300, height: 300, margin: "auto" }}>
         <Scanner
+          formats={[
+            "ean_13",
+            "code_128",
+            "qr_code",
+            // add more formats as needed: 'upc_a','upc_e','code_39',...
+          ]}
           onScan={(detected) => {
             console.log("Detected:", detected);
             if (detected && detected.length > 0) {
