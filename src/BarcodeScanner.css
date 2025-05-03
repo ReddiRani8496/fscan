@@ -308,14 +308,14 @@
 }
 
 .pdf-share-modal .whatsapp-btn {
-  background: #25d366;
+  background: #25d366 !important;
   color: #fff !important;
 }
 .pdf-share-modal .email-btn {
-  background: #d44638;
+  background: #d44638 !important;
   color: #fff !important;
 }
 .pdf-share-modal .copy-btn {
-  background: #1a73e8;
+  background: #1a73e8 !important;
   color: #fff !important;
 }
