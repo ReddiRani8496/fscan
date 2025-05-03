@@ -196,3 +196,113 @@
   border: none;
   cursor: pointer;
 }
+/* Blur and overlay for modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+}
+
+/* Modal dialog styles */
+.pdf-share-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 1001;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0, 0, 0, 0.13);
+  padding: 32px 20px 24px 20px;
+  min-width: 320px;
+  max-width: 95vw;
+  text-align: center;
+  animation: modalPop 0.2s;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.pdf-share-modal h3 {
+  color: #1a73e8;
+  margin-bottom: 20px;
+}
+
+.pdf-share-modal .modal-close {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 24px;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002;
+  transition: color 0.15s;
+}
+.pdf-share-modal .modal-close:hover {
+  color: #f33;
+}
+
+.pdf-share-modal .share-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 18px;
+}
+
+.pdf-share-modal .share-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #f6f8fa;
+  transition: background 0.2s;
+  justify-content: center;
+}
+.pdf-share-modal .whatsapp-btn {
+  background: #25d366;
+  color: #fff;
+}
+.pdf-share-modal .email-btn {
+  background: #d44638;
+  color: #fff;
+}
+.pdf-share-modal .copy-btn {
+  background: #1a73e8;
+  color: #fff;
+}
+
+.pdf-share-modal .close-btn {
+  margin-top: 8px;
+  background: #eee;
+  color: #333;
+  font-size: 15px;
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Blur effect for main content when modal is open */
+.blurred {
+  filter: blur(4px) brightness(0.9);
+  pointer-events: none;
+  user-select: none;
+}

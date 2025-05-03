@@ -526,211 +526,235 @@ function BarcodeScanner() {
   };
 
   return (
-    <div className="barcode-scanner-container">
-      <h2 style={{ textAlign: "center" }}>Barcode Scanner</h2>
-      <div className="scanner-box">
-        <Scanner
-          formats={[
-            "code_128",
-            "code_39",
-            "ean_13",
-            "ean_8",
-            "upc_a",
-            "upc_e",
-            "qr_code",
-          ]}
-          onScan={(detected) => {
-            if (detected && detected.length > 0) {
-              setResult(detected[0].rawValue);
-            }
-          }}
-          onError={(error) => console.error(error)}
-        />
+    <div>
+      {/* Main content, blurred when modal is open */}
+      <div
+        className={`main-content${pdfDownloaded && pdfUrl ? " blurred" : ""}`}
+      >
+        <div className="barcode-scanner-container">
+          <h2 style={{ textAlign: "center" }}>Barcode Scanner</h2>
+          <div className="scanner-box">
+            <Scanner
+              formats={[
+                "code_128",
+                "code_39",
+                "ean_13",
+                "ean_8",
+                "upc_a",
+                "upc_e",
+                "qr_code",
+              ]}
+              onScan={(detected) => {
+                if (detected && detected.length > 0) {
+                  setResult(detected[0].rawValue);
+                }
+              }}
+              onError={(error) => console.error(error)}
+            />
+          </div>
+
+          {/* Add Product Form */}
+          {showForm && (
+            <form className="add-product-form" onSubmit={handleSubmit}>
+              <div>
+                <label>
+                  Barcode: <b>{form.code}</b>
+                </label>
+              </div>
+              <div>
+                <label>
+                  Product Name <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  name="productName"
+                  value={form.productName}
+                  onChange={handleInputChange}
+                  className={formErrors.productName ? "red-border" : ""}
+                />
+              </div>
+              <div>
+                <label>
+                  MRP <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  name="mrp"
+                  type="number"
+                  value={form.mrp}
+                  onChange={handleInputChange}
+                  className={formErrors.mrp ? "red-border" : ""}
+                />
+              </div>
+              <div>
+                <label>
+                  Discount <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  name="discount"
+                  type="number"
+                  value={form.discount}
+                  onChange={handleInputChange}
+                  className={formErrors.discount ? "red-border" : ""}
+                />
+              </div>
+              <div>
+                <label>
+                  Weight <span style={{ color: "red" }}>*</span>
+                </label>
+                <input
+                  name="weight"
+                  value={form.weight}
+                  onChange={handleInputChange}
+                  className={formErrors.weight ? "red-border" : ""}
+                />
+              </div>
+              <div className="form-buttons">
+                <button type="submit">Add Product</button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Bill Table */}
+          <h3 style={{ textAlign: "center" }}>Current Bill</h3>
+          {scannedProducts.length === 0 ? (
+            <p style={{ textAlign: "center" }}>No products scanned yet.</p>
+          ) : (
+            <div className="bill-table-container">
+              <table className="bill-table">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>MRP</th>
+                    <th>Discount</th>
+                    <th>Weight</th>
+                    <th>Quantity</th>
+                    <th>Remove</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {scannedProducts.map((p) => (
+                    <tr key={p.code}>
+                      <td>{p.productName}</td>
+                      <td>Rs. {p.mrp}</td>
+                      <td>Rs. {p.discount}</td>
+                      <td>{p.weight}</td>
+                      <td>
+                        <button onClick={() => decrement(p.code)}>-</button>
+                        <span style={{ margin: "0 8px" }}>{p.quantity}</span>
+                        <button onClick={() => increment(p.code)}>+</button>
+                      </td>
+                      <td>
+                        <button onClick={() => removeProduct(p.code)}>
+                          Remove
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={4} style={{ textAlign: "right" }}>
+                      <b>Total</b>
+                    </td>
+                    <td colSpan={2}>
+                      <b>Rs. {getTotal().toFixed(2)}</b>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+              <div className="bill-actions">
+                <PDFDownloadLink
+                  document={
+                    <InvoicePDF
+                      products={scannedProducts}
+                      billDate={billDate}
+                    />
+                  }
+                  fileName={`xAbleKart_Invoice_${Date.now()}.pdf`}
+                  className="bill-actions-link"
+                >
+                  {({ loading, url }) =>
+                    loading ? (
+                      "Generating PDF..."
+                    ) : (
+                      <span
+                        onClick={() => {
+                          setPdfDownloaded(true);
+                          setPdfUrl(url);
+                        }}
+                        style={{ cursor: "pointer" }}
+                      >
+                        Generate Bill (PDF)
+                      </span>
+                    )
+                  }
+                </PDFDownloadLink>
+                <button onClick={clearBill} className="clear-btn">
+                  Clear Bill (New Customer)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Add Product Form */}
-      {showForm && (
-        <form className="add-product-form" onSubmit={handleSubmit}>
-          <div>
-            <label>
-              Barcode: <b>{form.code}</b>
-            </label>
-          </div>
-          <div>
-            <label>
-              Product Name <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="productName"
-              value={form.productName}
-              onChange={handleInputChange}
-              className={formErrors.productName ? "red-border" : ""}
-            />
-          </div>
-          <div>
-            <label>
-              MRP <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="mrp"
-              type="number"
-              value={form.mrp}
-              onChange={handleInputChange}
-              className={formErrors.mrp ? "red-border" : ""}
-            />
-          </div>
-          <div>
-            <label>
-              Discount <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="discount"
-              type="number"
-              value={form.discount}
-              onChange={handleInputChange}
-              className={formErrors.discount ? "red-border" : ""}
-            />
-          </div>
-          <div>
-            <label>
-              Weight <span style={{ color: "red" }}>*</span>
-            </label>
-            <input
-              name="weight"
-              value={form.weight}
-              onChange={handleInputChange}
-              className={formErrors.weight ? "red-border" : ""}
-            />
-          </div>
-          <div className="form-buttons">
-            <button type="submit">Add Product</button>
-            <button type="button" onClick={handleCancel} className="cancel-btn">
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
-
-      {/* Bill Table */}
-      <h3 style={{ textAlign: "center" }}>Current Bill</h3>
-      {scannedProducts.length === 0 ? (
-        <p style={{ textAlign: "center" }}>No products scanned yet.</p>
-      ) : (
-        <div className="bill-table-container">
-          <table className="bill-table">
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>MRP</th>
-                <th>Discount</th>
-                <th>Weight</th>
-                <th>Quantity</th>
-                <th>Remove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {scannedProducts.map((p) => (
-                <tr key={p.code}>
-                  <td>{p.productName}</td>
-                  <td>Rs. {p.mrp}</td>
-                  <td>Rs. {p.discount}</td>
-                  <td>{p.weight}</td>
-                  <td>
-                    <button onClick={() => decrement(p.code)}>-</button>
-                    <span style={{ margin: "0 8px" }}>{p.quantity}</span>
-                    <button onClick={() => increment(p.code)}>+</button>
-                  </td>
-                  <td>
-                    <button onClick={() => removeProduct(p.code)}>
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={4} style={{ textAlign: "right" }}>
-                  <b>Total</b>
-                </td>
-                <td colSpan={2}>
-                  <b>Rs. {getTotal().toFixed(2)}</b>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-          <div className="bill-actions">
-            <PDFDownloadLink
-              document={
-                <InvoicePDF products={scannedProducts} billDate={billDate} />
-              }
-              fileName={`xAbleKart_Invoice_${Date.now()}.pdf`}
-              className="bill-actions-link"
-            >
-              {({ loading, url }) =>
-                loading ? (
-                  "Generating PDF..."
-                ) : (
-                  <span
-                    onClick={() => {
-                      setPdfDownloaded(true);
-                      setPdfUrl(url);
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    Generate Bill (PDF)
-                  </span>
-                )
-              }
-            </PDFDownloadLink>
-            <button onClick={clearBill} className="clear-btn">
-              Clear Bill (New Customer)
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Share PDF Screen */}
+      {/* Modal: Share PDF */}
       {pdfDownloaded && pdfUrl && (
-        <div className="pdf-share-screen">
-          <h3>Share your Invoice</h3>
-          <div className="share-buttons">
-            <button className="whatsapp-btn" onClick={handleShareWhatsApp}>
-              <img
-                src="https://img.icons8.com/color/48/000000/whatsapp--v1.png"
-                alt="WhatsApp"
-                width={28}
-                height={28}
-              />
-              Share via WhatsApp
+        <>
+          <div className="modal-backdrop"></div>
+          <div className="pdf-share-modal">
+            <button
+              className="modal-close"
+              onClick={() => setPdfDownloaded(false)}
+              aria-label="Close"
+              title="Close"
+            >
+              ×
             </button>
-            <button className="email-btn" onClick={handleShareEmail}>
-              <img
-                src="https://img.icons8.com/color/48/000000/gmail-new.png"
-                alt="Email"
-                width={28}
-                height={28}
-              />
-              Share via Email
-            </button>
-            <button className="copy-btn" onClick={handleCopyLink}>
-              <img
-                src="https://img.icons8.com/material-rounded/48/000000/copy.png"
-                alt="Copy"
-                width={28}
-                height={28}
-              />
-              Copy PDF Link
+            <h3>Share your Invoice</h3>
+            <div className="share-buttons">
+              <button className="whatsapp-btn" onClick={handleShareWhatsApp}>
+                <img
+                  src="https://img.icons8.com/color/48/000000/whatsapp--v1.png"
+                  alt="WhatsApp"
+                  width={28}
+                  height={28}
+                />
+                Share via WhatsApp
+              </button>
+              <button className="email-btn" onClick={handleShareEmail}>
+                <img
+                  src="https://img.icons8.com/color/48/000000/gmail-new.png"
+                  alt="Email"
+                  width={28}
+                  height={28}
+                />
+                Share via Email
+              </button>
+              <button className="copy-btn" onClick={handleCopyLink}>
+                <img
+                  src="https://img.icons8.com/material-rounded/48/000000/copy.png"
+                  alt="Copy"
+                  width={28}
+                  height={28}
+                />
+                Copy PDF Link
+              </button>
+            </div>
+            <button
+              className="close-btn"
+              onClick={() => setPdfDownloaded(false)}
+            >
+              Close
             </button>
           </div>
-          <button
-            className="close-btn"
-            onClick={() => setPdfDownloaded(false)}
-            style={{ marginTop: 16 }}
-          >
-            Close
-          </button>
-        </div>
+        </>
       )}
     </div>
   );
