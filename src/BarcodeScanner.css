@@ -1,0 +1,133 @@
+.barcode-scanner-container {
+  /* No specific style for main container yet */
+}
+
+.barcode-scanner-title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.scanner-wrapper {
+  width: 300px;
+  height: 300px;
+  margin: auto;
+}
+
+.product-form {
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #eee;
+  max-width: 350px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.product-form label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.product-form input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.red-border {
+  border: 1px solid red !important;
+}
+
+.form-buttons {
+  margin-top: 10px;
+}
+
+.form-buttons button {
+  margin-right: 10px;
+}
+
+.cancel-btn {
+  background: #f33;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.current-bill-table-wrapper {
+  overflow-x: auto;
+}
+
+.current-bill-table {
+  margin: auto;
+  min-width: 600px;
+  border-collapse: collapse;
+}
+
+.current-bill-table th,
+.current-bill-table td {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+}
+
+.current-bill-table tfoot td {
+  font-weight: bold;
+  text-align: right;
+}
+
+.bill-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.generate-bill-btn {
+  background: #1a73e8;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 16px;
+  margin-right: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.clear-bill-btn {
+  background: #f33;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.pdf-downloaded-message {
+  margin: 20px auto;
+  padding: 16px 24px;
+  max-width: 400px;
+  background: #e3f0fb;
+  color: #1a73e8;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+}
+
+.pdf-link {
+  color: #1565c0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pdf-close {
+  margin-left: 16px;
+  color: #888;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+}
