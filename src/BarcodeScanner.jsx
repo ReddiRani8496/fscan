@@ -426,10 +426,14 @@
 
 // export default BarcodeScanner;
 
-import React, { useState } from "react";
-import Scanner from "./Scanner"; // Adjust import path as needed
+// import React, { useState } from "react";
+// import Scanner from "./Scanner"; // Adjust import path as needed
+// import { PDFDownloadLink } from "@react-pdf/renderer";
+// import InvoicePDF from "./InvoicePDF"; // Adjust import path as needed
+import React, { useState, useEffect } from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import InvoicePDF from "./InvoicePDF"; // Adjust import path as needed
+import InvoicePDF from "./InvoicePDF";
 import "./BarcodeScanner.css";
 
 function BarcodeScanner() {
