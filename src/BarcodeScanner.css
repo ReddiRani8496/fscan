@@ -306,3 +306,16 @@
   pointer-events: none;
   user-select: none;
 }
+
+.pdf-share-modal .whatsapp-btn {
+  background: #25d366;
+  color: #fff !important;
+}
+.pdf-share-modal .email-btn {
+  background: #d44638;
+  color: #fff !important;
+}
+.pdf-share-modal .copy-btn {
+  background: #1a73e8;
+  color: #fff !important;
+}
